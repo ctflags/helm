@@ -1,0 +1,8 @@
+releases:
+  - name: ctf
+    namespace: ctf
+    chart: .
+    values:
+      - values.yaml
+    secrets:
+      - secrets.yaml

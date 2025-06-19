@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ctf
+  {{- if .Values.tls.enabled }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.tls.cluster_issuer }}
+  {{- end }}
+spec:
+  rules:
+  - host: {{ .Values.domain }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ctf
+            port:
+              number: 80
+  {{- if .Values.tls.enabled }}
+  tls:
+    - hosts:
+      - {{ .Values.domain }}
+      secretName: ctf-tls
+  {{- end }}

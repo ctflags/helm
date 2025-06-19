@@ -1,0 +1,41 @@
+domain: ctf.domain.tld
+tls:
+  enabled: true
+  cluster_issuer: letsencrypt 
+
+image:
+    registry: registry.gitlab.com/ctflag
+    tag: app:v1.0.3
+
+database_url: postgres://...
+
+config:
+
+  challenges:
+  - name: "Challenge 1"
+    description: "Find the hidden flag in the logs"
+    flag: "flag_1"
+    points: 100
+    hint: "Check the application logs carefully"
+  - name: "Challenge 2"
+    description: "Decode the secret message"
+    flag: "flag_2"
+    points: 150
+    hint: "Base64 might be involved"
+  - name: "Challenge 3"
+    description: "Resource checker challenge"
+    flag: "flag_3"
+    points: 200
+    hint: "Did you annotate something ?"
+
+  participants:
+    - token: "p1"
+      name: "Sample Player01"
+    - token: "p2"
+      name: "Sample Player02"
+    - token: "p3"
+      name: "Sample Player03"
+
+  organizers:
+    - token: "Admin"
+      name: "Sample Administrator"
