@@ -1,0 +1,48 @@
+stages:
+  - release
+  - versions
+  - helm
+
+release:
+  image: node:20
+  stage: release
+  script:
+    - touch CHANGELOG.md
+    - npm install @semantic-release/gitlab @semantic-release/exec @semantic-release/changelog
+    - npx semantic-release
+  artifacts:
+    paths:
+      - CHANGELOG.md
+  rules:
+  - if: '$CI_COMMIT_BRANCH == "main"'
+    changes:
+    - templates/**/*
+    - Chart.yaml
+
+update version in helm chart:
+  stage: versions
+  image: lucj/ci:1.1
+  script:
+    - git config --global user.email "devops@ctflag"
+    - git config --global user.name "CTFlag"
+    - git remote remove gitlab_origin 2>/dev/null || true 
+    - git remote add gitlab_origin https://oauth2:${GITLAB_TOKEN}@gitlab.com/ctflag/helm.git
+    # Helm chart version
+    - yq -i ".version=\"${CI_COMMIT_TAG}\"" ./Chart.yaml
+    - git add ./Chart.yaml
+    # Commit and push changes to the main branch
+    - git commit -m "Update version in helm chart with tag $CI_COMMIT_TAG"
+    - git push gitlab_origin HEAD:main -o ci.skip
+  only:
+    - tags
+
+upload helm chart:
+  stage: helm
+  image: lucj/kubectl-helm:1.31.1
+  script:
+    - echo "about to package and push helm chart to GitLab OCI registry"
+    - helm registry login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
+    - helm package . --version $CI_COMMIT_TAG
+    - helm push ./ctf-$CI_COMMIT_TAG.tgz oci://$CI_REGISTRY/ctflag
+  only:
+    - tags
