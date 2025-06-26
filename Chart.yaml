@@ -2,5 +2,5 @@ apiVersion: v2
 name: ctf
 description: Web application for CTF session
 type: application
-version: v1.0.0
+version: v1.0.1
 appVersion: "1.0.0"
