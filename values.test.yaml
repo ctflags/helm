@@ -6,4 +6,4 @@ tls:
 
 image:
     registry: registry.gitlab.com/ctflag
-    tag: app:v1.0.3
+    tag: app:v1.0.5
