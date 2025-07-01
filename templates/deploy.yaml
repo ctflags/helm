@@ -51,7 +51,11 @@ spec:
         - name: config
           mountPath: /app/config/config.yaml
           subPath: config.yaml
+        - name: shared-files
+          mountPath: /tmp/shared
       volumes:
       - name: config
         configMap:
           name: ctf
+      - name: shared-files
+        emptyDir: {}
