@@ -5,7 +5,7 @@ tls:
 
 image:
     registry: registry.gitlab.com/ctflag
-    tag: app:v1.0.3
+    tag: app:v1.0.9
 
 database_url: postgres://...
 
