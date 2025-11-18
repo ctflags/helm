@@ -1,12 +1,6 @@
-environments:
-  test:
-  prod:
----
 releases:
   - name: ctf
     namespace: ctf
     chart: .
     values:
-    - ./values.{{ .Environment.Name }}.yaml
-    secrets:
-    - ./secrets.{{ .Environment.Name }}.yaml
+    - ./values.yaml
