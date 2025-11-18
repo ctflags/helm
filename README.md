@@ -6,7 +6,12 @@ Make sure [cert-manager](https://cert-manager.io) is installed in the cluster be
 
 ## Deployment with Helmfile
 
-First, clone the helm repository and go into this one.
+First, clone the helm repository.
+
+```bash
+git clone https://github.com/ctflags/helm.git
+cd helm
+```
 
 Next, create a `values.yaml` following the example of [this one](./values.yaml). 
 
