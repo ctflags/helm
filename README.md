@@ -13,9 +13,9 @@ git clone https://github.com/ctflags/helm.git
 cd helm
 ```
 
-Next, create a `values.yaml` following the example of [this one](./values.yaml). 
+Next, create a `values.yaml` following [this example](./values.yaml). 
 
-Note: You need to provide a Postgres connection URL. This can be a local or a hosted one.
+Note: If the `database.url` is not provided, a local Postgres database will be run.
 
 Next, verify the templates are correctly rendered.
 
