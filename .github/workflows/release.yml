@@ -1,0 +1,67 @@
+name: Release Helm Chart
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**'
+  release:
+    types:
+      - published
+
+env:
+  REGISTRY: ghcr.io
+  CHART_NAME: ctf
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: '3.18.1'
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package Helm Chart
+        run: |
+          helm dependency update .
+          helm package . --destination ./charts
+
+      - name: Push Helm Chart to OCI Registry
+        run: |
+          chart_version=$(helm show chart . | grep '^version:' | awk '{print $2}')
+          chart_package="charts/${CHART_NAME}-${chart_version}.tgz"
+          
+          helm push "$chart_package" oci://${{ env.REGISTRY }}/${{ github.repository_owner }}
+
+      - name: Create Release Assets
+        if: github.event_name == 'release'
+        run: |
+          chart_version=$(helm show chart . | grep '^version:' | awk '{print $2}')
+          chart_package="charts/${CHART_NAME}-${chart_version}.tgz"
+          
+          # Upload chart as release asset
+          gh release upload ${{ github.event.release.tag_name }} "$chart_package"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
