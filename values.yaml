@@ -8,8 +8,8 @@ image:
   tag: app:v1.0.4
 
 # if not provided, a local Postgres database is run
-database:
-  url: postgres://...
+# database:
+#   url: postgres://...
 
 config:
 
