@@ -6,9 +6,6 @@ on:
       - main
     paths:
       - '**'
-  release:
-    types:
-      - published
 
 env:
   REGISTRY: ghcr.io
@@ -18,8 +15,10 @@ jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
+      issues: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,6 +29,34 @@ jobs:
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install semantic-release
+        run: |
+          npm install -g semantic-release @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/github @semantic-release/exec
+
+      - name: Run Semantic Release
+        id: semantic_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          output=$(semantic-release 2>&1)
+          echo "$output"
+          
+          # Check if a new release was created
+          if echo "$output" | grep -q "Published release"; then
+            new_tag=$(git describe --tags --exact-match HEAD 2>/dev/null)
+            echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
+            echo "release_created=true" >> $GITHUB_OUTPUT
+            echo "New release created: $new_tag"
+          else
+            echo "release_created=false" >> $GITHUB_OUTPUT
+            echo "No new release created"
+          fi
 
       - name: Install Helm
         uses: azure/setup-helm@v3
@@ -44,24 +71,31 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Package Helm Chart
+        if: steps.semantic_release.outputs.release_created == 'true'
         run: |
           helm dependency update .
           helm package . --destination ./charts
 
       - name: Push Helm Chart to OCI Registry
+        if: steps.semantic_release.outputs.release_created == 'true'
         run: |
           chart_version=$(helm show chart . | grep '^version:' | awk '{print $2}')
           chart_package="charts/${CHART_NAME}-${chart_version}.tgz"
           
           helm push "$chart_package" oci://${{ env.REGISTRY }}/${{ github.repository_owner }}
 
-      - name: Create Release Assets
-        if: github.event_name == 'release'
+      - name: Upload Release Asset
+        if: steps.semantic_release.outputs.release_created == 'true'
         run: |
           chart_version=$(helm show chart . | grep '^version:' | awk '{print $2}')
           chart_package="charts/${CHART_NAME}-${chart_version}.tgz"
           
-          # Upload chart as release asset
-          gh release upload ${{ github.event.release.tag_name }} "$chart_package"
+          # Upload chart as release asset to the new release
+          gh release upload ${{ steps.semantic_release.outputs.new_tag }} "$chart_package" --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip Release
+        if: steps.semantic_release.outputs.release_created == 'false'
+        run: |
+          echo "No new release created by semantic-release. Skipping Helm chart packaging and publishing."
