@@ -1,4 +1,4 @@
-domain: ctf.domain.tld
+domain: ctf-test.exoscale.dev
 
 tls:
   enabled: true
@@ -6,7 +6,7 @@ tls:
 
 image:
   registry: ghcr.io/ctflags
-  tag: app:1.0.6
+  tag: app:v1.0.4
 
 # if not provided, a local Postgres database is run
 # database:
