@@ -42,21 +42,30 @@ jobs:
       - name: Run Semantic Release
         id: semantic_release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_CI }}
         run: |
+          set +e  # Disable exit on error for this step
           output=$(semantic-release 2>&1)
+          exit_code=$?
           echo "$output"
           
-          # Check if a new release was created
-          if echo "$output" | grep -q "Published release"; then
+          # Check if a new release was created (exit code 0 means success)
+          if [ $exit_code -eq 0 ] && echo "$output" | grep -q "Published release"; then
             new_tag=$(git describe --tags --exact-match HEAD 2>/dev/null)
             echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
             echo "release_created=true" >> $GITHUB_OUTPUT
             echo "New release created: $new_tag"
           else
             echo "release_created=false" >> $GITHUB_OUTPUT
-            echo "No new release created"
+            if [ $exit_code -eq 0 ]; then
+              echo "No new release needed (up to date)"
+            else
+              echo "No new release created (exit code: $exit_code)"
+            fi
           fi
+          
+          # Always exit successfully from this step
+          exit 0
 
       - name: Install Helm
         uses: azure/setup-helm@v3
@@ -93,7 +102,7 @@ jobs:
           # Upload chart as release asset to the new release
           gh release upload ${{ steps.semantic_release.outputs.new_tag }} "$chart_package" --clobber
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_CI }}
 
       - name: Skip Release
         if: steps.semantic_release.outputs.release_created == 'false'
