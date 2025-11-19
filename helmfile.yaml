@@ -2,7 +2,7 @@ releases:
   - name: ctf
     namespace: ctf
     chart: oci://ghcr.io/ctflags/ctf
-    version: v1.0.4
+    version: 1.0.5
     values:
       - values.yaml
 
