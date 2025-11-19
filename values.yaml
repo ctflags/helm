@@ -4,10 +4,12 @@ tls:
   cluster_issuer: letsencrypt 
 
 image:
-    registry: registry.gitlab.com/ctflag
-    tag: app:v1.0.9
+  registry: ghcr.io/ctflags
+  tag: app:v1.0.4
 
-database_url: postgres://...
+# if not provided, a local Postgres database is run
+database:
+  url: postgres://...
 
 config:
 
