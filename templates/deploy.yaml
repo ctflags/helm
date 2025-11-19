@@ -11,13 +11,19 @@ spec:
     metadata:
       labels:
         app: ctf
+      annotations:
+        checksum/secret : {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
     spec:
       containers:
       - name: ctf
         image: {{ .Values.image.registry }}/{{ .Values.image.tag }}
         env:
         - name: DATABASE_URL
-          value: {{ .Values.database_url }}
+          {{- if (.Values.database).url }}
+          value: {{ (.Values.database).url }}
+          {{- else }}
+          value: "postgresql://ctf:ctf@postgres:5432/ctf"
+          {{- end }}
         ports:
         - containerPort: 3000
         resources:
@@ -55,7 +61,7 @@ spec:
           mountPath: /tmp/shared
       volumes:
       - name: config
-        configMap:
-          name: ctf
+        secret:
+          secretName: ctf
       - name: shared-files
         emptyDir: {}
