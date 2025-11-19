@@ -13,9 +13,10 @@ git clone https://github.com/ctflags/helm.git
 cd helm
 ```
 
-Next, create a `values.yaml` following [this example](./values.yaml). 
+Next, modify `values.yaml`:
 
-Note: If the `database.url` is not provided, a local Postgres database will be run.
+- you can provide a Postgres connection string with `database.url`. if not provided, a local Postgres database will be run.
+- under `config`, update the `challenges`, `participants` and `organizers` properties.
 
 Next, verify the templates are correctly rendered.
 
@@ -29,6 +30,8 @@ Then, deploy the application.
 helmfile apply
 ```
 
-## Deployment with the helm Cart
+## Removing the application
 
-WIP: helm chart to be released soon (currently being moved to another registry).
+```bash
+helmfile destroy
+```
