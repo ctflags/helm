@@ -8,6 +8,10 @@ plugins:
         # Update Chart.yaml version with the new release version (remove 'v' prefix)
         version_without_v=$(echo "${nextRelease.version}" | sed 's/^v//')
         sed -i "s/^version:.*/version: $version_without_v/" Chart.yaml
+  - - "@semantic-release/git"
+    - assets:
+        - "Chart.yaml"
+      message: "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
   - "@semantic-release/github"
 preset: "conventionalcommits"
 tagFormat: "v${version}"
