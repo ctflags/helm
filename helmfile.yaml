@@ -3,4 +3,4 @@ releases:
     namespace: ctf
     chart: .
     values:
-    - ./values.yaml
+    - values.yaml
