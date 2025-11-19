@@ -6,7 +6,7 @@ tls:
 
 image:
   registry: ghcr.io/ctflags
-  tag: app:v1.0.4
+  tag: app:1.0.6
 
 # if not provided, a local Postgres database is run
 # database:
