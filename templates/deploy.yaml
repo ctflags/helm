@@ -19,11 +19,10 @@ spec:
         image: {{ .Values.image.registry }}/{{ .Values.image.tag }}
         env:
         - name: DATABASE_URL
-          {{- if (.Values.database).url }}
-          value: {{ (.Values.database).url }}
-          {{- else }}
-          value: "postgresql://ctf:ctf@postgres:5432/ctf"
-          {{- end }}
+          valueFrom:
+            secretKeyRef:
+              name: postgres
+              key: DATABASE_URL
         ports:
         - containerPort: 3000
         resources:
