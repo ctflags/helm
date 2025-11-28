@@ -32,11 +32,11 @@ config:
     hint: "Did you annotate something ?"
 
   participants:
-    - token: "p1"
+    - token: "player1"
       name: "Sample Player01"
-    - token: "p2"
+    - token: "player2"
       name: "Sample Player02"
-    - token: "p3"
+    - token: "player3"
       name: "Sample Player03"
 
   organizers:
